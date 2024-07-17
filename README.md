@@ -27,6 +27,7 @@ Este projeto implementa um mecanismo de controle de acesso com senha, usando um 
 - LCD 16 x 2.
 
 ## 📋 Diagrama de Circuito
+
 | Componente | Pino Arduino |
 |------------|--------------|
 | LED Vermelho | 12           |
@@ -48,6 +49,7 @@ Este projeto implementa um mecanismo de controle de acesso com senha, usando um 
 | Teclado C4  | 1            |
 
 ## ⚙️ Como Funciona
+
 1. **Configuração Inicial**: Inicializa os componentes e define o estado inicial do acesso (bloqueado).
 2. **Loop**: Verifica continuamente a entrada do teclado.
    - Se `#` ou `*` for pressionado, a entrada é resetada.
@@ -55,10 +57,11 @@ Este projeto implementa um mecanismo de controle de acesso com senha, usando um 
    - Se a senha digitada estiver correta, o sistema é desbloqueado.
    - Se incorreta, solicita ao usuário para tentar novamente.
 
-## 🔄 Feedback Visual
+## 🔄 Retorno Visual
+
 - **LED Vermelho**: Indica que o sistema está bloqueado;
 - **LED Azul**: Indica que o sistema está desbloqueado;
-- **Display LCD**: Fornece instruções e feedback ao usuário.
+- **Display LCD**: Fornece instruções e retorno ao usuário.
 
 ## 📜 Explicação das Funções
 
@@ -169,3 +172,48 @@ void loop() {
         - Se a senha estiver incorreta:
             - Mensagens de erro são exibidas no display LCD.
             - Após um atraso, o display é limpo para uma nova tentativa.
+
+### `setLocked(bool locked)`
+
+Esta função define o estado do acesso.
+
+```cpp
+void setLocked(bool locked) {
+  if (locked) {
+    digitalWrite(redLed, HIGH);
+    digitalWrite(blueLed, LOW);
+    servoMotor.write(0);
+  } else {
+    digitalWrite(redLed, LOW);
+    digitalWrite(blueLed, HIGH);
+    servoMotor.write(90);
+  }
+}
+```
+
+- Se `locked` for `true`:
+    - **O LED 🔴:** é aceso.
+    - **O LED 🔵:** é apagado.
+    - **O motor servo:** é movido para a posição de bloqueio (0 graus).
+
+- Se `locked` for `false`:
+    - **O LED 🔴:** é apagado.
+    - **O LED 🔵:** é aceso.
+    - **O motor servo:** é movido para a posição de desbloqueio (90 graus).
+
+## 📸 Imagem do Projeto em Funcionamento
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/digital-password.png" alt="Senha digital para o acesso">
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <b>Figura 1:</b> Projeto do controlador de acesso em funcionamento.
+      </td>
+    </tr>
+  </table>
+</div>
