@@ -46,3 +46,126 @@ Este projeto implementa um mecanismo de controle de acesso com senha, usando um 
 | Teclado C2  | 3            |
 | Teclado C3  | 2            |
 | Teclado C4  | 1            |
+
+## ⚙️ Como Funciona
+1. **Configuração Inicial**: Inicializa os componentes e define o estado inicial do acesso (bloqueado).
+2. **Loop**: Verifica continuamente a entrada do teclado.
+   - Se `#` ou `*` for pressionado, a entrada é resetada.
+   - Caso contrário, verifica a tecla digitada contra a senha.
+   - Se a senha digitada estiver correta, o sistema é desbloqueado.
+   - Se incorreta, solicita ao usuário para tentar novamente.
+
+## 🔄 Feedback Visual
+- **LED Vermelho**: Indica que o sistema está bloqueado;
+- **LED Azul**: Indica que o sistema está desbloqueado;
+- **Display LCD**: Fornece instruções e feedback ao usuário.
+
+## 📜 Explicação das Funções
+
+### `void setup()`
+
+Esta função é chamada uma vez quando o Arduino é inicializado. Aqui, os componentes são configurados e o estado inicial do sistema é definido.
+
+```cpp
+void setup() {
+  Serial.begin(9600);
+  pinMode(redLed, OUTPUT);
+  pinMode(blueLed, OUTPUT);
+  pinMode(servo, OUTPUT);
+  lcd.begin(16, 2);
+  servoMotor.attach(servo);
+  setLocked(locked);
+  lcd.setCursor(1, 0);
+  lcd.print("Digite a senha");
+  delay(2000);
+  lcd.clear();
+}
+```
+
+- Inicializa a comunicação serial com `Serial.begin(9600)`.
+- Define os pinos dos LEDs e do servo como saídas.
+- Inicializa o display LCD com `lcd.begin(16, 2)`.
+- Anexa o motor servo ao pino especificado.
+- Chama a função `setLocked(true)` para definir o estado inicial como bloqueado.
+- Exibe a mensagem "Digite a senha" no display LCD.
+
+### `void loop()`
+
+Esta função é chamada repetidamente e contém a lógica principal do programa.
+
+```cpp
+void loop() {
+  char key = teclado.getKey();
+
+  if (key) {
+    if (key == '#' || key == '*') {
+      lcd.clear();
+      hits = 0;
+      tries = 0;
+      delay(200);
+      locked = true;
+      setLocked(locked);
+    } else {
+      tries++;
+      lcd.print("*");
+
+      if (key == password[hits]) {
+        hits++;
+      }
+
+      if (tries == totalKeys) {
+        tries = 0;
+
+        if (hits == totalKeys) {
+          hits = 0;
+          locked = false;
+          setLocked(locked);
+          lcd.clear();
+          lcd.setCursor(1, 0);
+          lcd.print("Senha Correta!");
+          lcd.setCursor(1, 1);
+          lcd.print("Porta Aberta!");
+          delay(5000);
+          lcd.clear();
+          locked = true;
+          setLocked(locked);
+        } else {
+          locked = true;
+          setLocked(locked);
+          lcd.clear();
+          lcd.setCursor(1, 0);
+          lcd.print("Senha Errada!");
+          delay(2000);
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Tente Novamente");
+          delay(2000);
+          lcd.clear();
+        }
+
+        delay(200);
+      }
+    }
+  }
+}
+```
+
+- Obtém a tecla pressionada no teclado com `teclado.getKey()`.
+- Se a tecla `#` ou `*` for pressionada:
+    - O display LCD é limpo.
+    - As variáveis `hits` e `tries` são resetadas.
+    - O sistema é bloqueado chamando `setLocked(true)`.
+
+- Se outra tecla for pressionada:
+    - A variável `tries` é incrementada.
+    - Um asterisco é exibido no display LCD.
+    - Se a tecla digitada estiver correta, `hits` é incrementado.
+    - Se o número de tentativas for igual ao tamanho da senha:
+        - As tentativas são resetadas.
+        - Se todos os caracteres estiverem corretos:
+            - O sistema é desbloqueado chamando `setLocked(false)`.
+            - Mensagens de sucesso são exibidas no display LCD.
+            - Após um atraso, o sistema é bloqueado novamente.
+        - Se a senha estiver incorreta:
+            - Mensagens de erro são exibidas no display LCD.
+            - Após um atraso, o display é limpo para uma nova tentativa.
